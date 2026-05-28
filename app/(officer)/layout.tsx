@@ -173,15 +173,6 @@ export default function OfficerLayout({ children }: { children: React.ReactNode 
                 </span>
               )}
             </Link>
-
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="p-1.5 hover:bg-rose-50 rounded-xl text-rose-500 transition-all"
-              title="Keluar"
-            >
-              <LogOut className="w-4.5 h-4.5" />
-            </button>
           </div>
         </div>
 
