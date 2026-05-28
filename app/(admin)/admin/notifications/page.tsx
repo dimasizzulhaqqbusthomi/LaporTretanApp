@@ -14,17 +14,23 @@ export default function AdminNotificationsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadNotifications()
-  }, [])
+    let active = true
 
-  async function loadNotifications() {
-    setLoading(true)
-    const res = await getAdminNotifications()
-    if (res.success && res.data) {
-      setNotifications(res.data as Notification[])
+    async function loadNotifications() {
+      setLoading(true)
+      const res = await getAdminNotifications()
+      if (active && res.success && res.data) {
+        setNotifications(res.data as Notification[])
+      }
+      if (active) setLoading(false)
     }
-    setLoading(false)
-  }
+
+    loadNotifications()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   async function markAsRead(id: string) {
     await markNotificationAsRead(id)
@@ -54,27 +60,27 @@ export default function AdminNotificationsPage() {
     <div className="min-h-screen bg-slate-50/50 pb-12">
       
       {/* 📱 Premium Mobile App Bar Header */}
-      <div className="bg-white sticky top-0 z-30 px-4 py-3.5 border-b border-slate-100 flex items-center justify-between shadow-sm">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0 z-30 px-4 py-3.5 flex items-center justify-between shadow-md">
         <Link
           href="/admin/dashboard"
-          className="p-1 hover:bg-slate-50 rounded-xl transition-all"
+          className="p-1 hover:bg-white/10 rounded-xl transition-all"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-800" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
         
-        <span className="font-extrabold text-slate-800 text-[15px] tracking-tight">
+        <span className="font-extrabold text-white text-[15px] tracking-tight">
           Notifikasi Admin
         </span>
 
         {unreadCount > 0 ? (
           <button
             onClick={markAllAsRead}
-            className="text-xs font-black text-blue-600 hover:text-blue-800 transition-colors"
+            className="text-xs font-black text-blue-200 hover:text-white transition-colors"
           >
             Tandai Semua
           </button>
         ) : (
-          <div className="w-20" /> /* Spacer to match width of Left Back button for exact centering */
+          <div className="w-20" />
         )}
       </div>
 

@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Bell,
+  ArrowLeft,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect } from 'react'
@@ -29,10 +30,11 @@ export default function OfficerLayout({ children }: { children: React.ReactNode 
   const [officerName, setOfficerName] = useState('Petugas')
 
   useEffect(() => {
+    let active = true
     async function fetchData() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user || !active) return
 
       // Fetch officer name
       const { data: profile } = await supabase
@@ -40,6 +42,8 @@ export default function OfficerLayout({ children }: { children: React.ReactNode 
         .select('full_name')
         .eq('id', user.id)
         .single()
+      
+      if (!active) return
       if (profile?.full_name) setOfficerName(profile.full_name)
 
       // Fetch unread notifications count
@@ -48,9 +52,15 @@ export default function OfficerLayout({ children }: { children: React.ReactNode 
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('is_read', false)
+      
+      if (!active) return
       setUnreadCount(count || 0)
     }
     fetchData()
+
+    return () => {
+      active = false
+    }
   }, [pathname])
 
   async function handleLogout() {
@@ -148,35 +158,93 @@ export default function OfficerLayout({ children }: { children: React.ReactNode 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Mobile Header — consistent with admin */}
-        <div className="md:hidden bg-white sticky top-0 z-30 px-4 py-3.5 border-b border-slate-100 flex items-center justify-between shadow-sm">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-1 hover:bg-slate-50 rounded-xl transition-all"
-          >
-            <Menu className="w-5 h-5 text-slate-800" />
-          </button>
-
-          <span className="font-extrabold text-slate-800 text-[15px] tracking-tight">
-            {pageTitle}
-          </span>
-
-          <div className="flex items-center gap-3">
-            {/* Notification Bell */}
+        {!pathname.includes('/notifications') && pathname !== '/officer/dashboard' && (
+          <div className="md:hidden bg-gradient-to-r from-green-600 to-emerald-700 text-white sticky top-0 z-30 px-4 py-3.5 flex items-center justify-between shadow-md">
             <Link
-              href="/notifications"
-              className="relative p-1.5 hover:bg-slate-50 rounded-xl transition-all"
+              href="/officer/dashboard"
+              className="p-1 hover:bg-white/10 rounded-xl transition-all"
             >
-              <Bell className="w-4.5 h-4.5 text-slate-800" />
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </Link>
+
+            <span className="font-extrabold text-white text-[15px] tracking-tight">
+              {pageTitle}
+            </span>
+
+            <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <Link
+                href="/officer/notifications"
+                className="relative p-1.5 hover:bg-white/10 rounded-xl transition-all"
+              >
+                <Bell className="w-4.5 h-4.5 text-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-green-600">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <main className={cn(
+          pathname === '/officer/notifications' ? 'p-0' :
+          pathname === '/officer/dashboard' ? 'p-0 pb-24 md:p-6' : 'p-4 pb-24 md:pb-6 md:p-6'
+        )}>
+          {children}
+        </main>
+        
+        {/* Officer Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 pb-safe">
+          <div className="flex items-center justify-around px-2 py-2">
+            <Link
+              href="/officer/dashboard"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors',
+                pathname === '/officer/dashboard' ? 'text-green-600' : 'text-slate-400'
+              )}
+            >
+              <LayoutDashboard className={cn('w-5 h-5', pathname === '/officer/dashboard' && 'fill-green-100 stroke-green-600')} />
+              <span className="text-[10px] font-medium">Beranda</span>
+            </Link>
+
+            <Link
+              href="/officer/tasks"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors',
+                pathname.startsWith('/officer/tasks') ? 'text-green-600' : 'text-slate-400'
+              )}
+            >
+              <ClipboardList className={cn('w-5 h-5', pathname.startsWith('/officer/tasks') && 'fill-green-100 stroke-green-600')} />
+              <span className="text-[10px] font-medium">Tugas</span>
+            </Link>
+
+            <Link
+              href="/officer/notifications"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative',
+                pathname === '/officer/notifications' ? 'text-green-600' : 'text-slate-400'
+              )}
+            >
+              <Bell className={cn('w-5 h-5', pathname === '/officer/notifications' && 'fill-green-100 stroke-green-600')} />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-white">
+                <span className="absolute top-1 right-3 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-white px-1">
                   {unreadCount}
                 </span>
               )}
+              <span className="text-[10px] font-medium">Notifikasi</span>
             </Link>
-          </div>
-        </div>
 
-        <main className="p-4 md:p-6">{children}</main>
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Keluar</span>
+            </button>
+          </div>
+        </nav>
       </div>
     </div>
   )

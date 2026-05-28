@@ -30,10 +30,10 @@ export default async function OfficerTasksPage() {
   const completed = tasks?.filter((t) => t.status === 'completed') || []
 
   return (
-    <div className="max-w-md md:max-w-2xl mx-auto space-y-5 px-1 pb-10">
+    <div className="max-w-md md:max-w-2xl mx-auto space-y-6 px-1 pb-10">
 
-      {/* Page Header */}
-      <div>
+      {/* Page Header (Desktop Only to prevent duplication) */}
+      <div className="hidden md:block">
         <h1 className="text-2xl font-black text-slate-800 tracking-tight">Tugas Saya</h1>
         <p className="text-slate-400 text-sm mt-1 font-medium">
           Semua laporan yang ditugaskan kepada Anda
@@ -41,61 +41,55 @@ export default async function OfficerTasksPage() {
       </div>
 
       {tasks && tasks.length > 0 ? (
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* --- Menunggu Dikerjakan --- */}
           {pending.length > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
                 <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                 <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
                   Menunggu Dikerjakan ({pending.length})
                 </h2>
               </div>
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="divide-y divide-slate-50">
-                  {pending.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </div>
+              <div className="space-y-3">
+                {pending.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
             </div>
           )}
 
           {/* --- Dalam Proses --- */}
           {inProgress.length > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                 <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
                   Dalam Proses ({inProgress.length})
                 </h2>
               </div>
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="divide-y divide-slate-50">
-                  {inProgress.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </div>
+              <div className="space-y-3">
+                {inProgress.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
             </div>
           )}
 
           {/* --- Selesai --- */}
           {completed.length > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
                 <div className="w-2 h-2 rounded-full bg-emerald-400" />
                 <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
                   Selesai ({completed.length})
                 </h2>
               </div>
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden opacity-80">
-                <div className="divide-y divide-slate-50">
-                  {completed.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </div>
+              <div className="space-y-3 opacity-80">
+                {completed.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
             </div>
           )}
@@ -117,26 +111,36 @@ export default async function OfficerTasksPage() {
 }
 
 function TaskCard({ task }: { task: Record<string, any> }) {
+  const urgency = task.report?.urgency || 'low'
+  
+  // Custom border color based on urgency
+  let borderLeftColor = 'border-l-emerald-500'
+  if (urgency === 'emergency') {
+    borderLeftColor = 'border-l-red-500'
+  } else if (urgency === 'high' || urgency === 'medium') {
+    borderLeftColor = 'border-l-amber-500'
+  }
+
   return (
     <Link
       href={`/officer/tasks/${task.id}`}
-      className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50/70 transition-colors"
+      className={`flex items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm border-l-4 ${borderLeftColor} hover:scale-[1.01] active:scale-[0.99] transition-all`}
     >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-slate-800 truncate leading-snug">
           {task.report?.title}
         </p>
-        <div className="flex items-center gap-3 mt-1">
-          <div className="flex items-center gap-1 text-[11px] text-slate-400">
-            <MapPin className="w-3 h-3" />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+          <div className="flex items-center gap-1 text-[11px] text-slate-450 font-medium">
+            <MapPin className="w-3.5 h-3.5 text-slate-400" />
             <span>Kec. {task.report?.kecamatan || 'Bangkalan'}</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400">
-            <Calendar className="w-3 h-3" />
+          <div className="flex items-center gap-1 text-[11px] text-slate-450 font-medium">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
             <span>{formatDate(task.created_at)}</span>
           </div>
         </div>
-        <p className="text-[11px] text-slate-400 font-medium mt-0.5">{task.report?.category_name}</p>
+        <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mt-1.5">{task.report?.category_name}</p>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0 flex-col items-end">
         {task.report?.urgency && <UrgencyBadge urgency={task.report.urgency} />}

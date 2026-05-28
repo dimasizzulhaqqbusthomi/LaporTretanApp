@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Bell,
+  ArrowLeft,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect } from 'react'
@@ -33,15 +34,22 @@ export default function AdminLayout({
   const [waitingCount, setWaitingCount] = useState(0)
 
   useEffect(() => {
+    let active = true
     async function fetchWaitingCount() {
       const supabase = createClient()
       const { count } = await supabase
         .from('reports')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'waiting_verification')
+      
+      if (!active) return
       setWaitingCount(count || 0)
     }
     fetchWaitingCount()
+
+    return () => {
+      active = false
+    }
   }, [pathname])
 
   async function handleLogout() {
@@ -135,26 +143,27 @@ export default function AdminLayout({
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Mobile Header (Sesuai Screenshot User) */}
-        {!pathname.includes('/admin/notifications') && (
-          <div className="md:hidden bg-white sticky top-0 z-30 px-4 py-3.5 border-b border-slate-100 flex items-center justify-between shadow-sm">
-            <button onClick={() => setSidebarOpen(true)} className="p-1 hover:bg-slate-50 rounded-xl transition-all">
-              <Menu className="w-5 h-5 text-slate-800" />
-            </button>
+        {!pathname.includes('/admin/notifications') && pathname !== '/admin/dashboard' && (
+          <div className="md:hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0 z-30 px-4 py-3.5 flex items-center justify-between shadow-md">
+            <Link
+              href="/admin/dashboard"
+              className="p-1 hover:bg-white/10 rounded-xl transition-all"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </Link>
             
-            <span className="font-extrabold text-slate-800 text-[15px] tracking-tight">
-              {pathname.includes('dashboard')
-                ? 'Dashboard Admin'
-                : pathname.includes('reports')
+            <span className="font-extrabold text-white text-[15px] tracking-tight">
+              {pathname.includes('reports')
                 ? 'Daftar Laporan'
                 : 'Admin Panel'}
             </span>
 
             <div className="flex items-center gap-3">
               {/* Notification Bell with Dynamic Count */}
-              <Link href="/admin/notifications" className="relative p-1.5 hover:bg-slate-50 rounded-xl transition-all">
-                <Bell className="w-4.5 h-4.5 text-slate-800" />
+              <Link href="/admin/notifications" className="relative p-1.5 hover:bg-white/10 rounded-xl transition-all">
+                <Bell className="w-4.5 h-4.5 text-white" />
                 {waitingCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-white">
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-blue-600">
                     {waitingCount}
                   </span>
                 )}
@@ -162,9 +171,63 @@ export default function AdminLayout({
             </div>
           </div>
         )}
-        <main className={cn(pathname.includes('/admin/notifications') ? 'p-0' : 'p-4 md:p-6')}>
+        <main className={cn(
+          pathname.includes('/admin/notifications') ? 'p-0' : 
+          pathname === '/admin/dashboard' ? 'p-0 pb-24 md:p-6' : 'p-4 pb-24 md:pb-6 md:p-6'
+        )}>
           {children}
         </main>
+        
+        {/* Admin Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 pb-safe">
+          <div className="flex items-center justify-around px-2 py-2">
+            <Link
+              href="/admin/dashboard"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors',
+                pathname === '/admin/dashboard' ? 'text-blue-600' : 'text-slate-400'
+              )}
+            >
+              <LayoutDashboard className={cn('w-5 h-5', pathname === '/admin/dashboard' && 'fill-blue-100 stroke-blue-600')} />
+              <span className="text-[10px] font-medium">Beranda</span>
+            </Link>
+
+            <Link
+              href="/admin/reports"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors',
+                pathname.startsWith('/admin/reports') ? 'text-blue-600' : 'text-slate-400'
+              )}
+            >
+              <ClipboardList className={cn('w-5 h-5', pathname.startsWith('/admin/reports') && 'fill-blue-100 stroke-blue-600')} />
+              <span className="text-[10px] font-medium">Laporan</span>
+            </Link>
+
+            <Link
+              href="/admin/notifications"
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative',
+                pathname === '/admin/notifications' ? 'text-blue-600' : 'text-slate-400'
+              )}
+            >
+              <Bell className={cn('w-5 h-5', pathname === '/admin/notifications' && 'fill-blue-100 stroke-blue-600')} />
+              {waitingCount > 0 && (
+                <span className="absolute top-1 right-3 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-white px-1">
+                  {waitingCount}
+                </span>
+              )}
+              <span className="text-[10px] font-medium">Notifikasi</span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Keluar</span>
+            </button>
+          </div>
+        </nav>
       </div>
     </div>
   )

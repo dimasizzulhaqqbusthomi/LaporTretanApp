@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   TrendingUp,
   Shield,
-  FileText,
+  Bell,
 } from 'lucide-react'
 import Link from 'next/link'
 import AdminCharts from './AdminCharts'
@@ -52,96 +52,118 @@ export default async function AdminDashboard() {
     .order('created_at', { ascending: false })
 
   const displayName = profile?.full_name || 'Diana Putri Utami'
+  const firstName = displayName.split(' ')[0] || 'Admin'
+
+  const stats = [
+    {
+      label: 'Total',
+      value: total || 0,
+      icon: ClipboardList,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50/50 border-indigo-100',
+    },
+    {
+      label: 'Menunggu',
+      value: waiting || 0,
+      icon: Clock,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50/50 border-amber-100',
+    },
+    {
+      label: 'Proses',
+      value: inProgress || 0,
+      icon: TrendingUp,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50/50 border-blue-100',
+    },
+    {
+      label: 'Selesai',
+      value: completed || 0,
+      icon: CheckCircle2,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50/50 border-emerald-100',
+    },
+  ]
 
   return (
-    <div className="max-w-md md:max-w-2xl mx-auto space-y-5 px-1 pb-10">
+    <div className="min-h-screen bg-slate-50/50 pb-20 max-w-lg mx-auto w-full">
       
-      {/* 🛡️ Admin Profile Header Card */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl p-5 shadow-lg shadow-blue-150/50 flex items-center gap-4 relative overflow-hidden border border-blue-500/20">
-        <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/20">
-          <Shield className="w-6 h-6 text-white" />
+      {/* 🛡️ Premium Header (Sesuai Warga) */}
+      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white px-5 pt-12 pb-14 relative overflow-hidden rounded-b-[2rem] shadow-lg shadow-blue-900/10">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-lg pointer-events-none" />
+        
+        <div className="relative flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3 min-w-0 pr-12">
+            <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center font-extrabold text-base shadow-inner uppercase flex-shrink-0">
+              {firstName[0]}
+            </div>
+            <div className="min-w-0">
+              <p className="text-blue-200 text-[10px] font-bold tracking-wider uppercase">Selamat datang,</p>
+              <h1 className="text-lg font-bold mt-0.5 tracking-tight leading-snug break-words">
+                {displayName} <span className="inline-block animate-wiggle ml-1">👋</span>
+              </h1>
+            </div>
+          </div>
+          
+          <Link
+            href="/admin/notifications"
+            className="relative w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center transition-all active:scale-95 md:hidden"
+          >
+            <Bell className="w-5 h-5 text-white/90" />
+            {(waiting || 0) > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 border-2 border-blue-600 rounded-full text-[9px] flex items-center justify-center font-extrabold px-1 animate-pulse">
+                {waiting}
+              </span>
+            )}
+          </Link>
         </div>
-        <div className="min-w-0">
-          <h2 className="font-extrabold text-sm md:text-base leading-tight tracking-tight truncate">
-            {displayName}
-          </h2>
-          <p className="text-white/80 text-[10px] md:text-xs font-semibold mt-0.5">
-            Administrator · Kab. Bangkalan
+
+        {/* Hero Card / CTA */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-inner">
+          <p className="text-xs text-blue-100 mb-2 leading-relaxed">
+            Kelola aspirasi & pengaduan warga Kabupaten Bangkalan secara efisien.
           </p>
+          <Link
+            href="/admin/reports?status=waiting_verification"
+            className="flex items-center justify-center gap-2 bg-white text-blue-700 font-bold py-3 px-4 rounded-xl shadow-md shadow-blue-900/10 hover:bg-blue-50 active:scale-[0.98] transition-all text-sm"
+          >
+            <Shield className="w-4 h-4" />
+            Buka Panel Verifikasi Laporan ({waiting || 0})
+          </Link>
         </div>
       </div>
 
-      {/* 📊 Ringkasan Pengaduan Grid (Sesuai Screenshot User) */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-black text-slate-800 tracking-tight">
-          Ringkasan Pengaduan
-        </h3>
-        
-        <div className="grid grid-cols-2 gap-3">
-          {/* Card 1: Total Pengaduan */}
-          <div className="bg-indigo-600 text-white rounded-3xl p-4 flex flex-col justify-between aspect-[1.2] shadow-md shadow-indigo-100">
-            <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
-              <ClipboardList className="w-4.5 h-4.5 text-white" />
-            </div>
-            <div>
-              <p className="text-3xl font-black tracking-tight">{total || 0}</p>
-              <p className="text-[10px] text-white/80 font-bold uppercase tracking-wider mt-0.5">Total Pengaduan</p>
-            </div>
-          </div>
-
-          {/* Card 2: Menunggu Verifikasi */}
-          <div className="bg-amber-50/70 border border-amber-100/60 rounded-3xl p-4 flex flex-col justify-between aspect-[1.2]">
-            <div className="w-8 h-8 bg-amber-100/50 rounded-xl flex items-center justify-center">
-              <Clock className="w-4.5 h-4.5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-amber-600 tracking-tight">{waiting || 0}</p>
-              <p className="text-[10px] text-amber-800/80 font-bold uppercase tracking-wider mt-0.5">Menunggu Verifikasi</p>
-            </div>
-          </div>
-
-          {/* Card 3: Sedang Ditangani */}
-          <div className="bg-blue-50/70 border border-blue-100/60 rounded-3xl p-4 flex flex-col justify-between aspect-[1.2]">
-            <div className="w-8 h-8 bg-blue-100/50 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-4.5 h-4.5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-blue-600 tracking-tight">{inProgress || 0}</p>
-              <p className="text-[10px] text-blue-800/80 font-bold uppercase tracking-wider mt-0.5">Sedang Ditangani</p>
-            </div>
-          </div>
-
-          {/* Card 4: Selesai */}
-          <div className="bg-emerald-50/70 border border-emerald-100/60 rounded-3xl p-4 flex flex-col justify-between aspect-[1.2]">
-            <div className="w-8 h-8 bg-emerald-100/50 rounded-xl flex items-center justify-center">
-              <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-emerald-600 tracking-tight">{completed || 0}</p>
-              <p className="text-[10px] text-emerald-800/80 font-bold uppercase tracking-wider mt-0.5">Selesai</p>
-            </div>
+      {/* 📊 Stats Section (Sesuai Warga) */}
+      <div className="px-4 -mt-8 relative z-10">
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm shadow-slate-200/50">
+          <div className="grid grid-cols-4 gap-2">
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className={`${s.bg} border rounded-xl p-2.5 text-center flex flex-col justify-between min-h-[72px] transition-all hover:scale-[1.02]`}
+              >
+                <div className="flex justify-center mb-1">
+                  <s.icon className={`w-4.5 h-4.5 ${s.color}`} />
+                </div>
+                <div>
+                  <p className="text-lg font-extrabold text-slate-800 leading-none">{s.value}</p>
+                  <p className="text-[9px] font-bold text-slate-500 mt-1.5 uppercase tracking-wider leading-none">
+                    {s.label}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 🛡️ Primary Action Button (Sesuai Screenshot User) */}
-      <Link
-        href="/admin/reports?status=waiting_verification"
-        className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl text-center shadow-lg shadow-blue-150/40 hover:shadow-indigo-200/50 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
-      >
-        <Shield className="w-4 h-4 text-white" />
-        Buka Panel Verifikasi Laporan ({waiting || 0})
-      </Link>
-
-      {/* 📊 Statistik Section */}
-      <div className="space-y-3 pt-2">
-        <h3 className="text-sm font-black text-slate-800 tracking-tight">
-          Statistik Pengaduan Masuk
-        </h3>
-        
-        {/* Charts Container */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4">
+      {/* 📊 Statistik Chart Section */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-slate-800 text-sm tracking-tight">Statistik Pengaduan Masuk</h2>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-1">
             Distribusi Laporan Berdasarkan Kategori
           </p>

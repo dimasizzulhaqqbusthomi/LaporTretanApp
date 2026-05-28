@@ -7,35 +7,16 @@ import { createClient } from '@/lib/supabase/client'
 import { Notification } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 
-export default function NotificationsPage() {
+export default function OfficerNotificationsPage() {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
-  const [backHref, setBackHref] = useState('/dashboard')
 
   useEffect(() => {
     let active = true
 
-    async function determineRole() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user && active) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-        if (profile && active) {
-          if (profile.role === 'admin') {
-            setBackHref('/admin/dashboard')
-          } else if (profile.role === 'officer') {
-            setBackHref('/officer/dashboard')
-          }
-        }
-      }
-    }
-
     async function loadNotifications() {
+      setLoading(true)
       const supabase = createClient()
       const {
         data: { user },
@@ -58,7 +39,6 @@ export default function NotificationsPage() {
     }
 
     loadNotifications()
-    determineRole()
 
     return () => {
       active = false
@@ -89,6 +69,35 @@ export default function NotificationsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
   }
 
+  async function handleNotificationClick(notif: Notification) {
+    const isUnread = !notif.is_read
+    if (isUnread) {
+      await markAsRead(notif.id)
+    }
+
+    if (notif.report_id) {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Dynamic check for officer task ID associated with this report
+      const { data: task } = await supabase
+        .from('officer_tasks')
+        .select('id')
+        .eq('report_id', notif.report_id)
+        .eq('officer_id', user.id)
+        .maybeSingle()
+
+      if (task) {
+        router.push(`/officer/tasks/${task.id}`)
+      } else {
+        router.push('/officer/tasks')
+      }
+    }
+  }
+
   function formatNotifTime(dateStr: string) {
     const d = new Date(dateStr)
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
@@ -101,22 +110,13 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
-  const isOfficer = backHref.includes('officer')
-  const headerBg = isOfficer
-    ? 'bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-md'
-    : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-
-  const btnColor = isOfficer
-    ? 'text-green-200 hover:text-white'
-    : 'text-blue-200 hover:text-white'
-
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
       
       {/* 📱 Premium Mobile App Bar Header */}
-      <div className={`sticky top-0 z-30 px-4 py-3.5 flex items-center justify-between ${headerBg}`}>
+      <div className="sticky top-0 z-30 px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-md">
         <Link
-          href={backHref}
+          href="/officer/dashboard"
           className="p-1 hover:bg-white/10 rounded-xl transition-all"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
         {unreadCount > 0 ? (
           <button
             onClick={markAllAsRead}
-            className={`text-xs font-black transition-colors ${btnColor}`}
+            className="text-xs font-black text-green-200 hover:text-white transition-colors"
           >
             Tandai Semua
           </button>
@@ -143,7 +143,7 @@ export default function NotificationsPage() {
         {loading ? (
           <div className="space-y-3.5">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-3xl h-24 animate-pulse border border-slate-100 shadow-sm" />
+              <div key={i} className="bg-white rounded-3xl h-24 animate-pulse border border-slate-100/80 shadow-sm" />
             ))}
           </div>
         ) : notifications.length > 0 ? (
@@ -154,17 +154,10 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={notif.id}
-                  onClick={() => {
-                    if (isUnread) markAsRead(notif.id)
-                    if (notif.report_id) {
-                      // Redirect to dynamic report detail
-                      const prefix = backHref.includes('admin') ? '/admin/reports' : '/reports'
-                      router.push(`${prefix}/${notif.report_id}`)
-                    }
-                  }}
+                  onClick={() => handleNotificationClick(notif)}
                   className={`border transition-all duration-200 p-4 rounded-3xl shadow-sm flex items-start gap-3.5 relative cursor-pointer hover:shadow-md hover:scale-[1.005] ${
                     isUnread
-                      ? 'bg-blue-50/70 border-blue-150/40'
+                      ? 'bg-green-50/20 border-green-150/20'
                       : 'bg-white border-slate-100/80'
                   }`}
                 >
@@ -172,13 +165,13 @@ export default function NotificationsPage() {
                   <div
                     className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
                       isUnread
-                        ? 'bg-blue-100/50 border border-blue-150/20'
+                        ? 'bg-green-100/40 border border-green-150/10'
                         : 'bg-slate-50 border border-slate-100'
                     }`}
                   >
                     <Bell
                       className={`w-5 h-5 ${
-                        isUnread ? 'text-blue-600 fill-blue-500/20' : 'text-slate-400'
+                        isUnread ? 'text-green-600 fill-green-500/20' : 'text-slate-400'
                       }`}
                     />
                   </div>
@@ -203,16 +196,16 @@ export default function NotificationsPage() {
                     
                     <p
                       className={`text-[9px] mt-2 font-bold uppercase tracking-wider ${
-                        isUnread ? 'text-blue-600' : 'text-slate-400'
+                        isUnread ? 'text-green-600' : 'text-slate-400'
                       }`}
                     >
                       {formatNotifTime(notif.created_at)}
                     </p>
                   </div>
 
-                  {/* Blue Bullet Unread Indicator (Sesuai Mockup) */}
+                  {/* Green Bullet Unread Indicator */}
                   {isUnread && (
-                    <span className="absolute top-5 right-5 w-2 h-2 rounded-full bg-blue-600 shadow-sm animate-pulse" />
+                    <span className="absolute top-5 right-5 w-2 h-2 rounded-full bg-green-600 shadow-sm animate-pulse" />
                   )}
                 </div>
               )
@@ -221,13 +214,13 @@ export default function NotificationsPage() {
         ) : (
           <div className="text-center py-24 bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
             <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <Bell className="w-8 h-8 text-slate-350" />
+              <Bell className="w-8 h-8 text-slate-355" />
             </div>
             <h3 className="font-extrabold text-slate-800 text-sm mb-1 tracking-tight">
               Belum Ada Notifikasi
             </h3>
             <p className="text-xs text-slate-400 font-semibold leading-relaxed max-w-xs mx-auto">
-              Notifikasi tentang laporan warga dan tugas baru Anda akan muncul di sini.
+              Notifikasi tentang tugas baru lapangan Anda akan muncul di sini.
             </p>
           </div>
         )}

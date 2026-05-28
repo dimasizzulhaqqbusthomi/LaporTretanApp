@@ -242,7 +242,7 @@ export async function performAdminReportAction(
 
     if (updateError) throw updateError
 
-    // 3. Handle officer_tasks — reassignment: remove old task, insert fresh for new officer
+     // 3. Handle officer_tasks — reassignment: remove old task, insert fresh for new officer
     if (action === 'assign') {
       const newOfficerId = updates.assigned_officer_id as string | null
 
@@ -259,6 +259,24 @@ export async function performAdminReportAction(
           officer_id: newOfficerId,
           department_id: selectedDept,
           status: 'assigned',
+        })
+
+        // Send a dynamic notification to the assigned officer matching their department!
+        const deptNames: Record<string, string> = {
+          'a88d4a14-fae9-4922-ac27-9ba93492c761': 'Dinas PUPR (Infrastruktur)',
+          '86254398-f621-4470-8b1e-c37dfc3b6def': 'Dinas DLH (Kebersihan)',
+          '64aaa38c-3abe-4636-b911-55cef6c64f82': 'Dinas Dishub (Lalu Lintas)',
+          'b8f73d37-262c-478f-8527-4530071a1d57': 'Badan BPBD (Kebencanaan)',
+          '1a9b334d-51cc-4aba-a054-93725235af5f': 'Dinas PRKP (Permukiman)',
+        }
+        const deptName = deptNames[selectedDept || ''] || 'Dinas Terkait'
+
+        await adminSupabase.from('notifications').insert({
+          user_id: newOfficerId,
+          title: 'Tugas Lapangan Baru',
+          message: `Admin telah menugaskan laporan "${report.title}" kepada ${deptName}. Silakan tinjau dan selesaikan.`,
+          report_id: reportId,
+          is_read: false,
         })
       }
     }
