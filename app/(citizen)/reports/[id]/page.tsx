@@ -17,6 +17,7 @@ import { formatDateTime, getStatusLabel } from '@/lib/utils'
 import { ReportStatus } from '@/lib/types'
 import SatisfactionRatingForm from './SatisfactionRatingForm'
 import AdditionalEvidenceForm from './AdditionalEvidenceForm'
+import ReportMap from '@/components/ReportMap'
 
 const statusTimeline: { status: ReportStatus; label: string; icon: React.ReactNode }[] = [
   { status: 'waiting_verification', label: 'Terkirim', icon: <FileText className="w-4 h-4" /> },
@@ -158,6 +159,20 @@ export default async function ReportDetailPage({
             </div>
           </div>
         )}
+
+        {/* Peta Lokasi Kejadian */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <h3 className="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-1.5">
+            <MapPin className="w-4 h-4 text-slate-500" />
+            Lokasi Kejadian
+          </h3>
+          <ReportMap
+            latitude={report.latitude ?? null}
+            longitude={report.longitude ?? null}
+            address={report.address ? `${report.address}, Kec. ${report.kecamatan}` : null}
+            title={report.title}
+          />
+        </div>
 
         {/* Description */}
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">

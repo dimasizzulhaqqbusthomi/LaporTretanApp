@@ -125,7 +125,7 @@ export default async function DashboardPage() {
       <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white px-5 pt-12 pb-14 relative overflow-hidden rounded-b-[2rem] shadow-lg shadow-blue-900/10">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-lg pointer-events-none" />
-        
+
         <div className="relative flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center font-bold text-base shadow-inner">
@@ -134,11 +134,11 @@ export default async function DashboardPage() {
             <div>
               <p className="text-blue-200 text-[11px] font-medium tracking-wide uppercase">Selamat datang,</p>
               <h1 className="text-lg font-bold mt-0.5 tracking-tight flex items-center gap-1.5">
-                {firstName} <span className="animate-wiggle">👋</span>
+                {firstName} <span className="animate-wiggle"></span>
               </h1>
             </div>
           </div>
-          
+
           <Link
             href="/notifications"
             className="relative w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center transition-all active:scale-95"
@@ -225,7 +225,7 @@ export default async function DashboardPage() {
             Lihat Semua
           </Link>
         </div>
-        
+
         {recentReports && recentReports.length > 0 ? (
           <div className="space-y-3">
             {recentReports.map((report: Report) => (

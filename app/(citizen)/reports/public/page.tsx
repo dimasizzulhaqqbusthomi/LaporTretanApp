@@ -6,6 +6,7 @@ import ReportCard from '@/components/ReportCard'
 import { createClient } from '@/lib/supabase/client'
 import { Report } from '@/lib/types'
 import { CATEGORY_LIST, KECAMATAN_LIST, STATUS_LIST } from '@/lib/utils'
+import BangkalanReportsMap from '@/components/BangkalanReportsMap'
 
 export default function PublicReportsPage() {
   const [reports, setReports] = useState<Report[]>([])
@@ -152,11 +153,9 @@ export default function PublicReportsPage() {
         )}
       </div>
 
-      {/* Map Placeholder */}
-      <div className="mx-4 mt-4 bg-blue-50 rounded-2xl border border-blue-100 p-4 text-center">
-        <Map className="w-6 h-6 text-blue-400 mx-auto mb-1" />
-        <p className="text-xs text-blue-600 font-medium">Peta Laporan Bangkalan</p>
-        <p className="text-xs text-blue-400">Integrasi peta interaktif akan tersedia</p>
+      {/* Interactive Map */}
+      <div className="mx-4 mt-4">
+        <BangkalanReportsMap reports={filtered} />
       </div>
 
       {/* Reports Grid */}

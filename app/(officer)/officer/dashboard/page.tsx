@@ -110,7 +110,7 @@ export default async function OfficerDashboard() {
       <div className="bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 text-white px-5 pt-12 pb-14 relative overflow-hidden rounded-b-[2rem] shadow-lg shadow-emerald-900/10">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-green-500/20 rounded-full blur-lg pointer-events-none" />
-        
+
         <div className="relative flex items-center justify-between mb-6">
           <div className="flex items-center gap-3 min-w-0 pr-12">
             <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center font-extrabold text-base shadow-inner uppercase flex-shrink-0">
@@ -119,11 +119,11 @@ export default async function OfficerDashboard() {
             <div className="min-w-0">
               <p className="text-green-200 text-[10px] font-bold tracking-wider uppercase">Selamat datang,</p>
               <h1 className="text-lg font-bold mt-0.5 tracking-tight leading-snug break-words">
-                {displayName} <span className="inline-block animate-wiggle ml-1">👋</span>
+                {displayName} <span className="inline-block animate-wiggle ml-1"></span>
               </h1>
             </div>
           </div>
-          
+
           <Link
             href="/officer/notifications"
             className="relative w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center transition-all active:scale-95 md:hidden"
