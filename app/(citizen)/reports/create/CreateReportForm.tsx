@@ -91,6 +91,31 @@ export default function CreateReportForm() {
     }
   }, [defaultCategory])
 
+  // Auto-detect user's current location on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          setForm((prev) => ({
+            ...prev,
+            latitude: lat.toFixed(6),
+            longitude: lng.toFixed(6),
+          }))
+          // Reverse geocode the user's current location
+          reverseGeocode(lat, lng)
+          setGpsDetectedMsg('📍 Lokasi Anda saat ini berhasil terdeteksi otomatis!')
+          setTimeout(() => setGpsDetectedMsg(''), 5000)
+        },
+        (error) => {
+          console.warn('Gagal mendapatkan lokasi GPS saat ini:', error.message)
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      )
+    }
+  }, [])
+
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
