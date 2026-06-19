@@ -34,7 +34,6 @@ export default function ReportMap({ latitude, longitude, address, title }: Repor
   }
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
-  const wazeUrl = `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`
 
   return (
     <div className="space-y-3">
@@ -63,24 +62,15 @@ export default function ReportMap({ latitude, longitude, address, title }: Repor
             <p className="text-sm font-black text-slate-800 font-mono">{longitude.toFixed(6)}</p>
           </div>
         </div>
-        <div className="flex gap-2 pt-1">
+        <div className="pt-1">
           <a
             href={googleMapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-black py-2.5 rounded-xl transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-black py-2.5 rounded-xl transition-colors"
           >
             <ExternalLink className="w-3 h-3" />
             Google Maps
-          </a>
-          <a
-            href={wazeUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black py-2.5 rounded-xl transition-colors"
-          >
-            <Navigation className="w-3 h-3" />
-            Navigasi Waze
           </a>
         </div>
       </div>

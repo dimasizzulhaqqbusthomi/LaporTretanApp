@@ -216,22 +216,20 @@ export default function EditProfilePage() {
         <div className="bg-white rounded-2xl p-1.5 border border-slate-100 shadow-sm flex gap-1">
           <button
             onClick={() => { setActiveTab('profile'); clearMessages() }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              activeTab === 'profile'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeTab === 'profile'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             <User className="w-4 h-4" />
             Informasi
           </button>
           <button
             onClick={() => { setActiveTab('password'); clearMessages() }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              activeTab === 'password'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeTab === 'password'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             <Lock className="w-4 h-4" />
             Password
@@ -368,14 +366,13 @@ export default function EditProfilePage() {
                   {[1, 2, 3, 4].map((level) => (
                     <div
                       key={level}
-                      className={`h-1 flex-1 rounded-full transition-all ${
-                        newPassword.length >= level * 3
-                          ? level <= 1 ? 'bg-red-400'
-                            : level <= 2 ? 'bg-amber-400'
+                      className={`h-1 flex-1 rounded-full transition-all ${newPassword.length >= level * 3
+                        ? level <= 1 ? 'bg-red-400'
+                          : level <= 2 ? 'bg-amber-400'
                             : level <= 3 ? 'bg-blue-400'
-                            : 'bg-emerald-400'
-                          : 'bg-slate-100'
-                      }`}
+                              : 'bg-emerald-400'
+                        : 'bg-slate-100'
+                        }`}
                     />
                   ))}
                 </div>
@@ -393,13 +390,12 @@ export default function EditProfilePage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password baru"
-                  className={`w-full text-sm font-medium bg-slate-50/60 border rounded-xl px-3.5 py-3 pr-11 outline-none focus:ring-2 transition-all placeholder:text-slate-300 ${
-                    confirmPassword && confirmPassword !== newPassword
-                      ? 'border-red-300 text-red-600 focus:border-red-400 focus:ring-red-50'
-                      : confirmPassword && confirmPassword === newPassword
+                  className={`w-full text-sm font-medium bg-slate-50/60 border rounded-xl px-3.5 py-3 pr-11 outline-none focus:ring-2 transition-all placeholder:text-slate-300 ${confirmPassword && confirmPassword !== newPassword
+                    ? 'border-red-300 text-red-600 focus:border-red-400 focus:ring-red-50'
+                    : confirmPassword && confirmPassword === newPassword
                       ? 'border-emerald-300 text-slate-800 focus:border-emerald-400 focus:ring-emerald-50'
                       : 'border-slate-100 text-slate-800 focus:border-blue-400 focus:ring-blue-50'
-                  }`}
+                    }`}
                 />
                 <button
                   type="button"
@@ -419,13 +415,6 @@ export default function EditProfilePage() {
                   <AlertCircle className="w-3 h-3" /> Password tidak cocok
                 </p>
               )}
-            </div>
-
-            {/* Info note */}
-            <div className="mx-4 mb-4 bg-blue-50 border border-blue-100 rounded-xl px-3.5 py-3">
-              <p className="text-xs text-blue-600 leading-relaxed">
-                💡 Setelah password diubah, Anda akan tetap dalam sesi yang sama. Pastikan menyimpan password baru Anda.
-              </p>
             </div>
 
             {/* Submit */}
