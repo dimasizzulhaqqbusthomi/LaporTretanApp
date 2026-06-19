@@ -315,13 +315,42 @@ export default async function ReportDetailPage({
           )}
 
         {existingRating && (
-          <div className="bg-yellow-50 rounded-2xl p-4 border border-yellow-100 text-center">
-            <p className="text-yellow-700 font-semibold text-sm">
-              ⭐ Anda sudah memberikan rating {existingRating.rating}/5
-            </p>
-            {existingRating.comment && (
-              <p className="text-yellow-600 text-xs mt-1">{existingRating.comment}</p>
-            )}
+          <div className="bg-amber-50/50 border border-amber-100 rounded-3xl p-5 space-y-3.5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                <h3 className="text-xs font-black text-amber-800 uppercase tracking-wider">
+                  Penilaian Kepuasan Anda
+                </h3>
+              </div>
+              <div className="flex items-center gap-1 bg-amber-100/80 border border-amber-200/50 text-amber-800 px-2.5 py-0.5 rounded-full text-xs font-black">
+                ⭐ {existingRating.rating}/5
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  className={`text-lg leading-none ${
+                    star <= existingRating.rating ? 'text-amber-500' : 'text-slate-200'
+                  }`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            <div className="bg-white/80 border border-amber-100/50 rounded-2xl p-3.5 text-xs text-slate-700 leading-relaxed font-semibold">
+              <span className="font-extrabold uppercase text-[9px] tracking-wider block text-amber-600 mb-0.5">
+                Ulasan / Komentar Anda:
+              </span>
+              {existingRating.comment ? (
+                `"${existingRating.comment}"`
+              ) : (
+                <span className="text-slate-400 italic">Tidak ada ulasan tertulis.</span>
+              )}
+            </div>
           </div>
         )}
       </div>

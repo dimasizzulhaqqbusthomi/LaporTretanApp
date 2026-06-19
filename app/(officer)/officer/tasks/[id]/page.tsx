@@ -44,6 +44,12 @@ export default async function OfficerTaskDetailPage({
     .eq('report_id', report.id)
     .order('created_at', { ascending: false })
 
+  const { data: rating } = await supabase
+    .from('satisfaction_ratings')
+    .select('*')
+    .eq('report_id', report.id)
+    .maybeSingle()
+
   return (
     <div className="max-w-md md:max-w-2xl mx-auto space-y-4 px-1 pb-10">
 
@@ -60,6 +66,45 @@ export default async function OfficerTaskDetailPage({
           <p className="text-xs text-slate-400 font-medium">ID: {report?.id?.slice(0, 8)}...</p>
         </div>
       </div>
+
+      {/* ⭐ Penilaian Kepuasan Warga */}
+      {rating && (
+        <div className="bg-amber-50/50 border border-amber-100 rounded-3xl p-5 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+              <h3 className="text-xs font-black text-amber-800 uppercase tracking-wider">
+                Penilaian Kepuasan Warga
+              </h3>
+            </div>
+            <div className="flex items-center gap-1 bg-amber-100/80 border border-amber-200/50 text-amber-800 px-2.5 py-0.5 rounded-full text-xs font-black">
+              ⭐ {rating.rating}/5
+            </div>
+          </div>
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className={`text-lg leading-none ${
+                  star <= rating.rating ? 'text-amber-500' : 'text-slate-200'
+                }`}
+              >
+                ★
+              </span>
+            ))}
+          </div>
+          <div className="bg-white/80 border border-amber-100/50 rounded-2xl p-3.5 text-xs text-slate-700 leading-relaxed font-semibold">
+            <span className="font-extrabold uppercase text-[9px] tracking-wider block text-amber-600 mb-0.5">
+              Ulasan / Komentar Warga:
+            </span>
+            {rating.comment ? (
+              `"${rating.comment}"`
+            ) : (
+              <span className="text-slate-400 italic">Tidak ada ulasan tertulis dari warga.</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 📸 Foto Hasil Penyelesaian Tugas Petugas (Diletakkan di Bagian Paling Atas!) */}
       {report?.completion_photo_urls && report.completion_photo_urls.length > 0 && (
