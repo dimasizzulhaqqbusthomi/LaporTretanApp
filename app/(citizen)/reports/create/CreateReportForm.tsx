@@ -404,7 +404,104 @@ export default function CreateReportForm() {
           </div>
         )}
 
-        {/* Photo Upload */}
+        {/* 1. Title */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+            📝 Judul Laporan <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            required
+            placeholder="Contoh: Jalan berlubang di depan pasar..."
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+
+        {/* 2. Category */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">
+            📂 Kategori <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {CATEGORY_LIST.map((cat) => {
+              const meta = categoryMeta[cat] || {
+                icon: ClipboardList,
+                color: 'text-slate-600',
+                bg: 'bg-slate-50',
+              }
+              const IconComp = meta.icon
+              const isSelected = form.category === cat
+
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setForm((p) => ({ ...p, category: cat }))}
+                  className={`text-left p-3 rounded-xl border-2 transition-all flex items-center gap-2.5 ${
+                    isSelected
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100'
+                      : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200'
+                  }`}
+                >
+                  <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-white shadow-sm' : meta.bg}`}>
+                    <IconComp className={`w-4 h-4 ${isSelected ? 'text-blue-600' : meta.color}`} />
+                  </div>
+                  <span className="text-[11px] font-bold leading-tight">{cat}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 3. Description */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+            💬 Deskripsi <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            required
+            rows={4}
+            placeholder="Jelaskan kondisi dan dampak masalah secara detail..."
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 resize-none"
+          />
+        </div>
+
+        {/* 4. Urgency */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">⚡ Tingkat Urgensi</label>
+          <div className="grid grid-cols-4 gap-2">
+            {URGENCY_LIST.map((u) => {
+              const active: Record<string, string> = {
+                low: 'border-green-400 bg-green-50 text-green-700 shadow-sm shadow-green-100',
+                medium: 'border-yellow-400 bg-yellow-50 text-yellow-700 shadow-sm shadow-yellow-100',
+                high: 'border-orange-400 bg-orange-50 text-orange-700 shadow-sm shadow-orange-100',
+                emergency: 'border-red-400 bg-red-50 text-red-700 shadow-sm shadow-red-100',
+              }
+              return (
+                <button
+                  key={u.value}
+                  type="button"
+                  onClick={() => setForm((p) => ({ ...p, urgency: u.value }))}
+                  className={`py-2.5 rounded-xl border-2 text-[10px] font-bold transition-all text-center ${
+                    form.urgency === u.value
+                      ? active[u.value]
+                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300'
+                  }`}
+                >
+                  {u.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 5. Photo Upload */}
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">
             📸 Foto Bukti{' '}
@@ -441,104 +538,7 @@ export default function CreateReportForm() {
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} className="hidden" />
         </div>
 
-        {/* Category */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">
-            📂 Kategori <span className="text-red-500">*</span>
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {CATEGORY_LIST.map((cat) => {
-              const meta = categoryMeta[cat] || {
-                icon: ClipboardList,
-                color: 'text-slate-600',
-                bg: 'bg-slate-50',
-              }
-              const IconComp = meta.icon
-              const isSelected = form.category === cat
-
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setForm((p) => ({ ...p, category: cat }))}
-                  className={`text-left p-3 rounded-xl border-2 transition-all flex items-center gap-2.5 ${
-                    isSelected
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100'
-                      : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200'
-                  }`}
-                >
-                  <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-white shadow-sm' : meta.bg}`}>
-                    <IconComp className={`w-4 h-4 ${isSelected ? 'text-blue-600' : meta.color}`} />
-                  </div>
-                  <span className="text-[11px] font-bold leading-tight">{cat}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Title & Description */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-              📝 Judul Laporan <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              required
-              placeholder="Contoh: Jalan berlubang di depan pasar..."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-              💬 Deskripsi <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              required
-              rows={4}
-              placeholder="Jelaskan kondisi dan dampak masalah secara detail..."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Urgency */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">⚡ Tingkat Urgensi</label>
-          <div className="grid grid-cols-4 gap-2">
-            {URGENCY_LIST.map((u) => {
-              const active: Record<string, string> = {
-                low: 'border-green-400 bg-green-50 text-green-700 shadow-sm shadow-green-100',
-                medium: 'border-yellow-400 bg-yellow-50 text-yellow-700 shadow-sm shadow-yellow-100',
-                high: 'border-orange-400 bg-orange-50 text-orange-700 shadow-sm shadow-orange-100',
-                emergency: 'border-red-400 bg-red-50 text-red-700 shadow-sm shadow-red-100',
-              }
-              return (
-                <button
-                  key={u.value}
-                  type="button"
-                  onClick={() => setForm((p) => ({ ...p, urgency: u.value }))}
-                  className={`py-2.5 rounded-xl border-2 text-[10px] font-bold transition-all text-center ${
-                    form.urgency === u.value
-                      ? active[u.value]
-                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  {u.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Real Dynamic Interactive Map */}
+        {/* 6. Location */}
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-4">
           <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-blue-500" />
@@ -613,6 +613,7 @@ export default function CreateReportForm() {
           </div>
         </div>
 
+        {/* 7. Submit */}
         <button
           type="submit"
           disabled={loading}
