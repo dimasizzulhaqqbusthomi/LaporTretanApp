@@ -327,3 +327,77 @@ export async function performAdminReportAction(
     return { success: false, error: err.message || 'Terjadi kesalahan penanganan aduan.' }
   }
 }
+
+export async function officerComplainTask(
+  reportId: string,
+  taskId: string,
+  officerId: string,
+  complainNote: string
+) {
+  try {
+    const adminSupabase = createAdminClient()
+
+    // 1. Fetch report to verify it's still in 'assigned' status (not in_progress)
+    const { data: report, error: reportError } = await adminSupabase
+      .from('reports')
+      .select('*')
+      .eq('id', reportId)
+      .single()
+
+    if (reportError || !report) throw new Error('Laporan tidak ditemukan.')
+
+    if (report.status !== 'assigned') {
+      throw new Error('Complain hanya bisa diajukan jika laporan belum mulai ditangani (status: assigned).')
+    }
+
+    // 2. Reset report back to 'verified' so admin can reassign, save complain note
+    const { error: updateError } = await adminSupabase
+      .from('reports')
+      .update({
+        status: 'verified',
+        assigned_officer_id: null,
+        officer_complain_note: complainNote,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', reportId)
+
+    if (updateError) throw updateError
+
+    // 3. Delete the officer task so the assignment is cleared
+    await adminSupabase
+      .from('officer_tasks')
+      .delete()
+      .eq('id', taskId)
+
+    // 4. Write history
+    await adminSupabase.from('report_status_histories').insert({
+      report_id: reportId,
+      status: 'verified',
+      note: `Petugas mengajukan complain: "${complainNote}". Laporan dikembalikan ke admin untuk penugasan ulang.`,
+      updated_by: officerId,
+      updated_by_role: 'officer',
+    })
+
+    // 5. Notify all admins
+    const { data: adminProfiles } = await adminSupabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin')
+
+    if (adminProfiles && adminProfiles.length > 0) {
+      const adminNotifs = adminProfiles.map((adm) => ({
+        user_id: adm.id,
+        title: '⚠ Complain Petugas Lapangan',
+        message: `Petugas mengajukan complain untuk laporan "${report.title}": "${complainNote}". Silakan ubah penugasan dinas.`,
+        report_id: reportId,
+        is_read: false,
+      }))
+      await adminSupabase.from('notifications').insert(adminNotifs)
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('Error inside officerComplainTask server action:', err)
+    return { success: false, error: err.message || 'Terjadi kesalahan.' }
+  }
+}

@@ -9,8 +9,10 @@ import {
   Camera,
   X,
   Upload,
+  MessageCircleWarning,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { officerComplainTask } from '@/app/(citizen)/reports/[id]/actions'
 
 interface Props {
   task: Record<string, unknown>
@@ -28,6 +30,9 @@ export default function OfficerTaskActions({ task, report, officerId }: Props) {
   const [photos, setPhotos] = useState<File[]>([])
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
   const [showSourceModal, setShowSourceModal] = useState(false)
+  const [showComplainForm, setShowComplainForm] = useState(false)
+  const [complainNote, setComplainNote] = useState('')
+  const [complainError, setComplainError] = useState('')
 
   const taskStatus = task.status as string
   const reportStatus = report.status as string
@@ -81,6 +86,27 @@ export default function OfficerTaskActions({ task, report, officerId }: Props) {
 
     setLoading(false)
     router.refresh()
+  }
+
+  async function handleComplain() {
+    if (!complainNote.trim()) {
+      setComplainError('Mohon isi alasan complain terlebih dahulu.')
+      return
+    }
+    setLoading(true)
+    setComplainError('')
+    const res = await officerComplainTask(
+      report.id as string,
+      task.id as string,
+      officerId,
+      complainNote.trim()
+    )
+    setLoading(false)
+    if (res.success) {
+      router.push('/officer/tasks')
+    } else {
+      setComplainError(res.error || 'Terjadi kesalahan.')
+    }
   }
 
   async function handleCompleteTask() {
@@ -268,7 +294,8 @@ export default function OfficerTaskActions({ task, report, officerId }: Props) {
       )}
 
       {isAssigned && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+          {/* Start Task Button */}
           <button
             onClick={handleStartTask}
             disabled={loading}
@@ -281,9 +308,58 @@ export default function OfficerTaskActions({ task, report, officerId }: Props) {
             )}
             {loading ? 'Memproses...' : 'Mulai Tangani'}
           </button>
-          <p className="text-xs text-slate-400 text-center mt-2">
+          <p className="text-xs text-slate-400 text-center">
             Klik untuk menandai bahwa Anda sudah mulai menangani laporan ini
           </p>
+
+          {/* Officer Complain Section */}
+          <div className="border-t border-slate-100 pt-3">
+            {!showComplainForm ? (
+              <button
+                type="button"
+                onClick={() => setShowComplainForm(true)}
+                className="w-full flex items-center justify-center gap-2 border border-orange-200 bg-orange-50 text-orange-700 font-bold py-2.5 rounded-xl hover:bg-orange-100 transition-all text-xs"
+              >
+                Bidang Tidak Cocok? Ajukan Complain
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-slate-700">Alasan Complain <span className="text-red-500">*</span></p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Jelaskan mengapa laporan ini tidak sesuai dengan bidang/dinas Anda. Admin akan menugaskan ulang ke dinas yang tepat.
+                </p>
+                <textarea
+                  value={complainNote}
+                  onChange={(e) => { setComplainNote(e.target.value); setComplainError('') }}
+                  rows={3}
+                  placeholder="Contoh: Laporan ini seharusnya ditangani oleh Dinas DLH karena menyangkut masalah lingkungan..."
+                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 resize-none transition-colors ${complainError
+                    ? 'border-red-400 bg-red-50 focus:border-red-400 focus:ring-red-100'
+                    : 'border-slate-200 bg-slate-50 focus:border-orange-300 focus:ring-orange-100'
+                    }`}
+                />
+                {complainError && (
+                  <p className="text-[11px] text-red-600 font-semibold">{complainError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setShowComplainForm(false); setComplainNote(''); setComplainError('') }}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleComplain}
+                    disabled={loading}
+                    className="flex-1 flex items-center justify-center gap-2 bg-orange-600 text-white font-bold py-2.5 rounded-xl hover:bg-orange-700 disabled:opacity-60 text-xs"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircleWarning className="w-4 h-4" />}
+                    {loading ? 'Mengirim...' : 'Kirim Complain'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -69,6 +69,34 @@ export default async function AdminReportDetailPage({
       <div className="grid md:grid-cols-[1fr_340px] gap-5">
         {/* Left */}
         <div className="space-y-4">
+          {/* Completion Evidence from Officer */}
+          {report.status === 'completed' && (
+            <div className="bg-green-50/50 rounded-2xl border border-green-100 shadow-sm p-5 space-y-3">
+              <h3 className="font-semibold text-green-850 text-sm flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                Bukti Penyelesaian Petugas Lapangan
+              </h3>
+              {report.completion_note && (
+                <p className="text-sm text-green-700 font-semibold">
+                  Catatan: <span className="text-slate-600 font-normal">{report.completion_note}</span>
+                </p>
+              )}
+              {report.completion_photo_urls && report.completion_photo_urls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {report.completion_photo_urls.map((url: string, i: number) => (
+                    <a key={i} href={url} target="_blank" rel="noreferrer">
+                      <img
+                        src={url}
+                        alt={`Bukti Selesai ${i + 1}`}
+                        className="w-full h-28 object-cover rounded-xl hover:opacity-80 transition-opacity border border-green-200"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Report Info */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <h2 className="text-xl font-bold text-slate-800 mb-3">
@@ -149,34 +177,6 @@ export default async function AdminReportDetailPage({
               </div>
             )}
           </div>
-
-          {/* Completion Evidence from Officer */}
-          {report.status === 'completed' && (
-            <div className="bg-green-50/50 rounded-2xl border border-green-100 shadow-sm p-5 space-y-3">
-              <h3 className="font-semibold text-green-850 text-sm flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                Bukti Penyelesaian Petugas Lapangan
-              </h3>
-              {report.completion_note && (
-                <p className="text-sm text-green-700 font-semibold">
-                  Catatan: <span className="text-slate-600 font-normal">{report.completion_note}</span>
-                </p>
-              )}
-              {report.completion_photo_urls && report.completion_photo_urls.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {report.completion_photo_urls.map((url: string, i: number) => (
-                    <a key={i} href={url} target="_blank" rel="noreferrer">
-                      <img
-                        src={url}
-                        alt={`Bukti Selesai ${i + 1}`}
-                        className="w-full h-28 object-cover rounded-xl hover:opacity-80 transition-opacity border border-green-200"
-                      />
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* History */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
